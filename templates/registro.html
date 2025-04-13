@@ -116,25 +116,25 @@
     <div class="registro-container">
         <h1 class="titulo">Registrate</h1>
         
-        <form class="formulario">
+        <form class="formulario" method="POST" action="/registro">
             <div class="campo">
                 <label for="apellidos" class="etiqueta">Apellidos</label>
-                <input type="text" id="apellidos" class="input" required>
+                <input type="text" name="apellido" id="apellidos" class="input" required>
             </div>
             
             <div class="campo">
                 <label for="nombres" class="etiqueta">Nombre(s)</label>
-                <input type="text" id="nombres" class="input" required>
+                <input type="text" name="nombre" id="nombres" class="input" required>
             </div>
             
             <div class="campo">
                 <label for="fecha-nacimiento" class="etiqueta">Fecha de Nacimiento</label>
-                <input type="text" id="fecha-nacimiento" class="input" placeholder="dd/mm/aaaa" required>
+                <input type="text" name="fecha_nacimiento" id="fecha-nacimiento" class="input" placeholder="dd/mm/aaaa" required>
             </div>
             
             <div class="campo">
                 <label for="genero" class="etiqueta">Genero</label>
-                <select id="genero" class="input" required>
+                <select name="genero" id="genero" class="input" required>
                     <option value="" disabled selected>Seleccione</option>
                     <option value="masculino">Masculino</option>
                     <option value="femenino">Femenino</option>
@@ -145,26 +145,37 @@
             
             <div class="campo">
                 <label for="telefono" class="etiqueta">Telefono</label>
-                <input type="tel" id="telefono" class="input" required>
+                <input type="tel" name="telefono" id="telefono" class="input" required>
             </div>
             
             <div class="campo campo-completo">
                 <label for="domicilio" class="etiqueta">Domicilio</label>
-                <input type="text" id="domicilio" class="input" required>
+                <input type="text" name="domicilio" id="domicilio" class="input" required>
             </div>
             
             <div class="campo">
                 <label for="correo" class="etiqueta">Correo</label>
-                <input type="email" id="correo" class="input" required>
+                <input type="email" name="correo" id="correo" class="input" required>
             </div>
             
             <div class="campo">
                 <label for="contrasena" class="etiqueta">Contraseña</label>
-                <input type="password" id="contrasena" class="input" required>
+                <input type="password" name="contraseña" id="contrasena" class="input" required>
             </div>
             
             <button type="submit" class="boton-registrarse">Registrarse</button>
         </form>
     </div>
 </body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div style="color: red; text-align: center; margin-bottom: 20px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 </html>

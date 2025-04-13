@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VerdeFast - Iniciar Sesión</title>
-    <h1>Hola2</h1>
     <style>
         * {
             margin: 0;
@@ -182,27 +181,39 @@
     
     <div class="login-container">
         <h1 class="login-title">Iniciar Sesión</h1>
-        
-        <div class="input-group">
-            <input type="text" class="input-field" placeholder="Usuario">
-            <div class="input-icon">
-                <span class="icon-user"></span>
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="input-group">
+                <input type="text" id="correo" name="correo" class="input-field" placeholder="Usuario">
+                <div class="input-icon">
+                    <span class="icon-user"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="input-group">
-            <input type="password" class="input-field" placeholder="Contraseña">
-            <div class="input-icon">
-                <span class="icon-lock"></span>
+            
+            <div class="input-group">
+                <input type="password" id="contraseña" name="contraseña" class="input-field" placeholder="Contraseña">
+                <div class="input-icon">
+                    <span class="icon-lock"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="links-container">
-            <a href="#" class="forgot-password">¿Has olvidado tu contraseña?</a>
-            <a href="#" class="create-account">Crear Usuario</a>
-        </div>
-        
-        <button class="login-button">Iniciar Sesión</button>
+            <div class="links-container">
+                <a href="#" class="forgot-password">¿Has olvidado tu contraseña?</a>
+                <a href="/registro" class="create-account">Crear Usuario</a>
+            </div>
+            
+            <button  class="login-button">Iniciar Sesión</button>
+        </form>
     </div>
 </body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div style="color: red; text-align: center; margin-bottom: 20px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 </html>
+
