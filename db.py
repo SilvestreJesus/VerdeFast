@@ -1,9 +1,14 @@
 from flask import Flask, request, redirect, url_for, render_template, flash
-import redis
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
+import redis, requests , ipaddress
+
 
 app = Flask(__name__)
+CORS(app)
 
 app.secret_key = 'verdefast' 
+Esp32="http://192.168.0.17"
 
 # Conexión a Redis
 cx = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -39,7 +44,7 @@ def registro_usuario():
             'genero': genero,
             'fecha_nacimiento': fecha_nacimiento,
             'domicilio': domicilio,
-            'contraseña': contraseña,
+            'contraseña': generate_password_hash(contraseña),
             'rol':"cliente"
         })
 
@@ -59,7 +64,7 @@ def login():
         rol_guardado = usuario.get('rol')
 
         # Verificar la contraseña
-        if contraseña == contraseña_guardada and rol_guardado == 'cliente':
+        if check_password_hash(contraseña_guardada, contraseña) and rol_guardado == 'cliente':
             return redirect(url_for('panel_control'))
         else:
             flash('Contraseña incorrecta.', 'error')
@@ -76,5 +81,67 @@ def panel_control():
 def registro_exitoso():
     return redirect(url_for('index'))  # Redirige al index tras el registro
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/configuracion')
+def configuracion():
+    return render_template('/panel-control.html')  # Página de la configuración
+
+
+estado_pulsos = "off"
+
+@app.route("/pulsos", methods=["POST"])
+def set_estadoPulsos():
+    global estado_pulsos
+    nuevo_estado = request.args.get("state")
+
+    ip_cliente = request.remote_addr
+    try:
+        ip = ipaddress.ip_address(ip_cliente)
+        if not ip.is_private:
+            return "⛔ Acceso denegado: solo disponible desde red local", 403
+    except ValueError:
+        return "⛔ IP inválida", 400
+
+    if nuevo_estado in ["on", "off"]:
+        estado_pulsos = nuevo_estado
+        try:
+            url_esp32 = Esp32
+            endpoint = "/activar_pulsos" if nuevo_estado == "on" else "/desactivar_pulsos"
+            requests.get(f"{url_esp32}{endpoint}")
+        except Exception as e:
+            return f"❌ Error al contactar ESP32: {e}", 500
+
+        return f"✅ Estado actualizado a {estado_pulsos}"
+
+    return "❌ Estado inválido", 400
+
+
+
+estado_riego = "off"
+
+@app.route("/riego", methods=["POST"])
+def set_estadoRiego():
+    global estado_riego
+    nuevo_estado = request.args.get("state")
+
+    ip_cliente = request.remote_addr
+    try:
+        ip = ipaddress.ip_address(ip_cliente)
+        if not ip.is_private:
+            return "⛔ Acceso denegado: solo disponible desde red local", 403
+    except ValueError:
+        return "⛔ IP inválida", 400
+
+    if nuevo_estado in ["on", "off"]:
+        estado_riego = nuevo_estado
+        try:
+            url_esp32 = Esp32
+            endpoint = "/activar_riego" if nuevo_estado == "on" else "/desactivar_riego"
+            requests.get(f"{url_esp32}{endpoint}")
+        except Exception as e:
+            return f"❌ Error al contactar ESP32: {e}", 500
+
+        return f"✅ Estado actualizado a {estado_riego}"
+
+    return "❌ Estado inválido", 400
+
+

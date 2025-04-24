@@ -194,17 +194,10 @@
             background-color: #ff4136;
         }
 
-        .riego-thumb {
-            left: 2px;
-        }
-
         .pulsos-track {
-            background-color: #5cb85c;
+            background-color: #ff4136;
         }
 
-        .pulsos-thumb {
-            right: 2px;
-        }
 
         .slider-panel {
             background-color: #333333;
@@ -379,22 +372,67 @@
             <div class="control-panel">
                 <h2 class="panel-title">Sistema Riego</h2>
                 <div class="toggle-switch">
-                    <div class="toggle-track riego-track">
+                    <div id="riegoSwitch" class="toggle-track riego-track" >
                         <div class="toggle-thumb riego-thumb"></div>
                     </div>
                 </div>
             </div>
             
             <div class="control-panel">
-                <h2 class="panel-title">Sistema Pulsos Miolectrico</h2>
+                <h2 class="panel-title">Sistema Pulsos Mioelectrico</h2>
                 <div class="toggle-switch">
-                    <div class="toggle-track pulsos-track">
+                    <div id="pulsosSwitch" class="toggle-track pulsos-track" >
                         <div class="toggle-thumb pulsos-thumb"></div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <script>
+            const pulsosSwitch = document.getElementById('pulsosSwitch');
+            const riegoSwitch = document.getElementById('riegoSwitch');
+        
+            let estadoPulsos = false;
+            let estadoRiego = false;
+        
+            pulsosSwitch.addEventListener('click', () => {
+                estadoPulsos = !estadoPulsos;
+        
+                fetch(`/pulsos?state=${estadoPulsos ? 'on' : 'off'}`, {
+                    method: 'POST'
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Flask (Pulsos) respondió:', data);
+                });
+        
+                const thumb = pulsosSwitch.querySelector('.pulsos-thumb');
+                thumb.style.left = estadoPulsos ? '' : '2px'; 
+                thumb.style.right = estadoPulsos ? '2px' : ''; 
+                pulsosSwitch.style.backgroundColor = estadoPulsos ? '#5cb85c' : '#ff4136';
+            });
+        
+            riegoSwitch.addEventListener('click', () => {
+                estadoRiego = !estadoRiego;
+        
+                fetch(`/riego?state=${estadoRiego ? 'on' : 'off'}`, {
+                    method: 'POST'
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Flask (Riego) respondió:', data);
+                });
+        
+                const thumb = riegoSwitch.querySelector('.riego-thumb');
+                thumb.style.left = estadoRiego ? '' : '2px';
+                thumb.style.right = estadoRiego ? '2px' : ''; 
+                riegoSwitch.style.backgroundColor = estadoRiego ? '#5cb85c' : '#ff4136';
+            });
+        
+        </script>
+
+
+                
         <div class="slider-panel">
             <h2 class="panel-title">Regulador Voltaje Sistema Riego</h2>
             <div class="slider-container riego-slider">
@@ -402,10 +440,10 @@
                     <span>Min<br>0</span>
                     <span>Max<br>12</span>
                 </div>
-                <div class="slider-track">
-                    <div class="slider-fill"></div>
-                    <div class="slider-thumb"></div>
-                    <div class="slider-value">12</div>
+                <div class="slider-track" id="riegoSliderTrack">
+                    <div class="slider-fill" id="riegoSliderFill"></div>
+                    <div class="slider-thumb" id="riegoSliderThumb"></div>
+                    <div class="slider-value" id="riegoSliderValue">12V</div>
                 </div>
             </div>
         </div>
@@ -417,14 +455,52 @@
                     <span>Min<br>0</span>
                     <span>Max<br>5</span>
                 </div>
-                <div class="slider-track">
-                    <div class="slider-fill"></div>
-                    <div class="slider-thumb"></div>
-                    <div class="slider-value">3</div>
+                <div class="slider-track" id="pulsosSliderTrack">
+                    <div class="slider-fill" id="pulsosSliderFill"></div>
+                    <div class="slider-thumb" id="pulsosSliderThumb"></div>
+                    <div class="slider-value" id="pulsosSliderValue">3V</div>
                 </div>
             </div>
         </div>
         
+        <script>
+                        function initSlider(trackId, fillId, thumbId, valueId, maxVoltage, initialVoltage, endpoint) {
+                const track = document.getElementById(trackId);
+                const fill = document.getElementById(fillId);
+                const thumb = document.getElementById(thumbId);
+                const valueLabel = document.getElementById(valueId);
+        
+                // Posición inicial
+                const initialPercentage = initialVoltage / maxVoltage;
+                fill.style.width = `${initialPercentage * 100}%`;
+                thumb.style.left = `${initialPercentage * 100}%`;
+                valueLabel.textContent = `${initialVoltage}V`;
+                valueLabel.style.left = `${initialPercentage * 100}%`;
+        
+                track.addEventListener('click', function(e) {
+                    const rect = track.getBoundingClientRect();
+                    const offsetX = e.clientX - rect.left;
+                    const percentage = offsetX / rect.width;
+                    const voltage = Math.round(percentage * maxVoltage);
+        
+                    fill.style.width = `${percentage * 100}%`;
+                    thumb.style.left = `${percentage * 100}%`;
+                    valueLabel.textContent = `${voltage}V`;
+                    valueLabel.style.left = `${percentage * 100}%`;
+        
+                    fetch(`/${endpoint}?value=${voltage}`, {
+                        method: 'POST'
+                    })
+                    .then(res => res.text())
+                    .then(data => console.log(`${endpoint} actualizado:`, data));
+                });
+            }
+        
+            // Inicializar ambos sliders
+            initSlider('riegoSliderTrack', 'riegoSliderFill', 'riegoSliderThumb', 'riegoSliderValue', 12, 12, 'riego-voltage');
+            initSlider('pulsosSliderTrack', 'pulsosSliderFill', 'pulsosSliderThumb', 'pulsosSliderValue', 5, 3, 'pulsos-voltage');
+
+        </script>
         <a href="#" class="support-button">
             <p style="font-size: 30px;">☁️</p>
             Soporte
