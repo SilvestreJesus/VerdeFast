@@ -1,0 +1,89 @@
+<?php include '../layouts/default/head.php'; ?>
+    <link rel="stylesheet" href="/assets/css/main/perfil.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/icono-verdefast.png" />
+    <title>VerdeFast - Perfil</title>
+</head>
+<body>
+<?php include '../../controller/modules/alertas.php'; ?>
+    <header class="header">
+        <div class="logo">
+            <span class="verde">Verde</span><span class="fast">Fast</span>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a href="/view/tecnico/registro_planta.php" class="a nav-item">
+                        <span class="material-symbols-outlined">news</span>
+                        Registro Planta
+                    </a>
+                </li>
+                <li>
+                    <a href="/view/tecnico/soporte.php" class="a nav-item">
+                        <span class="material-symbols-outlined">news</span>
+                        Soporte
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="a nav-item">
+                        <span class="material-symbols-outlined">person</span>
+                        Perfil
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+ 
+    
+    <main class="registro-container">
+        <div class="icon-container">
+            <img src="/assets/img/icono.png" alt="Icono" class="icon">
+        </div>
+
+        <?php
+        require_once '../../controller/usuarios.php';
+        session_start();
+        $controlador = new ControladorUsuarios();
+        $usuario = $controlador->ver($_SESSION['usuario_id']);
+        ?>
+
+        <form class="formulario" action="/controller/crud/registrar_usuario.php" method="POST">
+            <div class="campo">
+                <label for="nombres" class="etiqueta">Nombre(s)</label>
+                <input type="text" id="nombre" name="nombre" class="input" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
+            </div>
+
+            <div class="campo">
+                <label for="apellidos" class="etiqueta">Apellidos</label>
+                <input type="text" id="apellidos" name="apellidos" class="input" value="<?= htmlspecialchars($usuario['apellidos']) ?>" required>
+            </div>
+            <div class="campo">
+                <label for="correo" class="etiqueta">Correo</label>
+                <input type="text" id="correo" name="correo" class="input" value="<?= htmlspecialchars($usuario['correo']) ?>" required>
+
+            </div>
+
+            <div class="campo">
+                <label for="telefono" class="etiqueta">Telefono</label>
+                <input type="text" id="telefono" name="telefono" class="input" value="<?= htmlspecialchars($usuario['telefono']) ?>" required>
+
+            </div>
+
+            <div class="campo">
+                <label for="fecha-nac" class="etiqueta">Fecha de Nacimiento</label>
+                <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" class="input" placeholder="dd/mm/aaaa" value="<?= htmlspecialchars($usuario['fecha_nacimiento']) ?>" required>
+            </div>
+            <div class="campo">
+                <label for="genero" class="etiqueta">Genero</label>
+                <input type="text" id="genero" name="genero" class="input" value="<?= htmlspecialchars($usuario['genero']) ?>" required>
+
+            </div>
+            <div class="campo campo-completo">
+                <label for="domicilio" class="etiqueta">Domicilio</label>
+                <input type="text" id="domicilio" name="domicilio" class="input" value="<?= htmlspecialchars($usuario['domicilio']) ?>" required>
+            </div>
+
+            
+            <a href="/controller/auth/logout.php" class="salir boton">Salir</a>
+        </form>
+    </main>
+<?php include '../layouts/default/footer.php'; ?>
