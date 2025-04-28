@@ -29,9 +29,7 @@ if (isset($_GET['accion'])) {
     else {
         echo "❌ Acción inválida";
     }
-} else {
-    echo "❌ No se recibió ninguna acción.";
-}
+} 
 ?>
 
     <header class="header">
@@ -118,9 +116,17 @@ if (isset($_GET['accion'])) {
         </div>  
     </main>
     <script>
+    const url = '/view/main/configuracion.php?accion=';
+
     document.getElementById('riego').addEventListener('change', function() {
         const accion = this.checked ? "activar_riego" : "desactivar_riego";
-        fetch('http://localhost:9100/view/main/configuracion.php?accion=' + accion)
+        
+        fetch('https://889a-189-215-150-134.ngrok-free.app' + url + accion)
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+
+        fetch('http://localhost:9100' + url + accion)
         .then(response => response.text())
         .then(data => console.log(data))
         .catch(error => console.error('Error:', error));
@@ -128,7 +134,13 @@ if (isset($_GET['accion'])) {
 
     document.getElementById('bioel').addEventListener('change', function() {
         const accion = this.checked ? "activar_pulsos" : "desactivar_pulsos";
-        fetch('http://localhost:9100/view/main/configuracion.php?accion=' + accion)
+        
+        fetch('https://889a-189-215-150-134.ngrok-free.app' + url + accion)
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+
+        fetch('http://localhost:9100' + url + accion)
         .then(response => response.text())
         .then(data => console.log(data))
         .catch(error => console.error('Error:', error));

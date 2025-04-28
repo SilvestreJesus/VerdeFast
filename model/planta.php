@@ -53,7 +53,7 @@ class ModeloPlanta {
 
     public function obtenerTiposFamilias() {
         return [
-            'tipo' => ['Masculino', 'Femenino', 'Otro', 'No especificar'],
+            'tipo' => ['Tubercular', 'Xerófila', 'Criogénica', 'Extremófila', 'Rizoma','Capilar'],
             'familia' => ['árboles', 'arbustos', 'hierbas', 'leñosas', 'herbáceas','suculentas']
             
         ];
