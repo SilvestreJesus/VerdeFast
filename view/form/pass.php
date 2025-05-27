@@ -3,7 +3,7 @@
     <title>VerdeFast - Inicia sesión o regístrate</title>
 </head>
 <body>
-<?php include '../../controller/modules/alertas.php'; ?>
+<?php include '../layouts/modules/alertas.php'; ?>
     <div class="verdefast">
         <span class="verde">Verde</span><span class="fast">Fast</span>
     </div>
@@ -11,14 +11,14 @@
         <div class="titulo-inputs">
             <h1>Recuperar contraseña</h1>
             <div class="inputs">
-                <article>
+                <fieldset>
                     <input type="text" placeholder="Usuario o correo electrónico">
                     <span class="material-symbols-outlined">person</span>
-                </article>
-                <article>
+                </fieldset>
+                <fieldset>
                     <input type="password" placeholder="Código de verificación">
                     <span class="material-symbols-outlined">lock</span>
-                </article>
+                </fieldset>
             </div>
         </div>
         <div class="botones">

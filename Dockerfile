@@ -1,15 +1,13 @@
-# Usa PHP 8.3 como base
-FROM php:8.3
+FROM php:8.2-apache
 
+# Instala herramientas necesarias y la extensión Redis para PHP
+RUN apt-get update && apt-get install -y \
+    libzip-dev unzip wget git zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
-# Copia todos los archivos del proyecto al contenedor
+# Copia los archivos del proyecto al directorio raíz de Apache
 COPY . /var/www/html/
 
-# Establece el directorio de trabajo
-WORKDIR /var/www/html/
-
-# Expone el puerto 9100
-EXPOSE 9100
-
-# Comando para iniciar el servidor en 0.0.0.0 (permite conexión desde otras máquinas)
-CMD ["php", "-S", "0.0.0.0:9100", "-t", "/var/www/html"]
+# Habilita el módulo rewrite de Apache
+RUN a2enmod rewrite

@@ -3,99 +3,157 @@
 
 include_once(__DIR__ . '/../controller/auth/conexion.php');
 
+// Clase para gestionar usuarios en Redis
 class ModeloUsuarios {
-    private Redis $redis;
+    private Redis $redisLocal;
+    private Redis $redisNube;
 
+    // Constructor: establece conexión con Redis local y en la nube
     public function __construct() {
-        
         $redisConnection = new RedisConnection();
-        $this->redis = $redisConnection->getRedis(); 
+        $this->redisLocal = $redisConnection->getLocal();
+        $this->redisNube = $redisConnection->getNube();
     }
 
-    // Método para verificar si el correo ya está registrado
+    // Guarda una operación (función anónima) tanto en local como en la nube
+    private function guardarEnAmbos(callable $operacion) {
+        foreach (['local' => $this->redisLocal, 'nube' => $this->redisNube] as $nombre => $redis) {
+            try {
+                $operacion($redis);
+            } catch (Exception $e) {
+                error_log("Error en Redis $nombre: " . $e->getMessage());
+            }
+        }
+    }
+    
+
+    // Verifica si ya existe un correo registrado
     private function correoExistente(string $correo): bool {
-        $ids = $this->redis->sMembers('usuarios');
-        foreach ($ids as $id) {
-            $usuario = $this->redis->hGetAll("usuario:$id");
-            if (isset($usuario['correo']) && $usuario['correo'] == $correo) {
-                return true; 
+        foreach ([$this->redisLocal, $this->redisNube] as $redis) {
+            $ids = $redis->sMembers('usuarios');
+            foreach ($ids as $id) {
+                $usuario = $redis->hGetAll("usuario:$id");
+                if (isset($usuario['correo']) && $usuario['correo'] === $correo) {
+                    return true;
+                }
             }
         }
         return false;
     }
+    
 
-    public function crearUsuario(string $nombre, string $apellidos, string $correo, string $pass, string $telefono, string $genero, string $fecha_nacimiento, string $domicilio): int {
-        // Verificar si el correo ya está registrado
+    // Crea un nuevo usuario y devuelve su ID (o -1 si el correo ya existe)
+    public function crearUsuario(string $nombre, string $apellidos, string $correo, string $pass, string $telefono, string $genero, string $fecha_nacimiento, string $domicilio,string $rol): int {
         if ($this->correoExistente($correo)) {
-            return -1; 
+            return -1; // no permite duplicar correos
         }
 
-        $id = $this->redis->incr('usuarios:id');
-        $this->redis->hMSet("usuario:$id", [
-            'id' => $id, 
+        // Genera un nuevo ID autoincremental usando Redis
+        $id = $this->redisLocal->incr('usuarios:id');
+
+        // Define el arreglo de datos del usuario
+        $usuario = [
+            'id' => $id,
             'nombre' => $nombre,
-            'apellidos' =>$apellidos,
+            'apellidos' => $apellidos,
             'correo' => $correo,
-            'pass_hash' => password_hash($pass, PASSWORD_DEFAULT),
+            'pass_hash' => password_hash($pass, PASSWORD_DEFAULT), // encripta la contraseña
             'telefono' => $telefono,
             'genero' => $genero,
             'fecha_nacimiento' => $fecha_nacimiento,
             'domicilio' => $domicilio,
-            'rol' => "cliente",
-        ]);
-        $this->redis->sAdd('usuarios', $id);
-        return $id;
+            'rol' =>  $rol,
+        ];
+
+        // Guarda los datos del usuario en Redis local y nube
+        $this->guardarEnAmbos(function($r) use ($id, $usuario) {
+            $r->hMSet("usuario:$id", $usuario); // guarda el hash de datos
+            $r->sAdd("usuarios", $id); // añade el ID al conjunto de usuarios
+        });
+
+        return $id; // devuelve el nuevo ID
     }
 
+    // Obtiene los datos de un usuario por ID
     public function obtenerUsuario(int $id): array {
-        return $this->redis->hGetAll("usuario:$id");
+        return $this->redisLocal->hGetAll("usuario:$id");
     }
 
+    // Actualiza los datos de un usuario existente
     public function actualizarUsuario(int $id, array $datos): bool {
-        if (!$this->redis->exists("usuario:$id")) {
-            return false;
+        if (!$this->redisLocal->exists("usuario:$id")) {
+            return false; // no existe el usuario
         }
-        return $this->redis->hMSet("usuario:$id", $datos);
+
+        $this->guardarEnAmbos(function($r) use ($id, $datos) {
+            $r->hMSet("usuario:$id", $datos); // actualiza los datos
+        });
+
+        return true;
     }
 
+    // Elimina un usuario por ID
     public function eliminarUsuario(int $id): bool {
-        $this->redis->del("usuario:$id");
-        return $this->redis->sRem('usuarios', $id) > 0;
+        $this->guardarEnAmbos(function($r) use ($id) {
+            $r->del("usuario:$id"); // elimina el hash de usuario
+            $r->sRem('usuarios', $id); // elimina el ID del conjunto
+        });
+
+        return true;
     }
 
+    // Lista todos los usuarios
     public function listarUsuarios(): array {
-        $ids = $this->redis->sMembers('usuarios');
+        $ids = $this->redisLocal->sMembers('usuarios'); // obtiene todos los IDs
         $usuarios = [];
         foreach ($ids as $id) {
-            $usuarios[] = $this->redis->hGetAll("usuario:$id");
+            $usuarios[] = $this->redisLocal->hGetAll("usuario:$id"); // obtiene datos de cada usuario
         }
         return $usuarios;
     }
 
-    public function obtenerUsuarioPorCorreo($correo) {
-        $ids = $this->redis->sMembers('usuarios');
-        foreach ($ids as $id) {
-            $usuario = $this->redis->hGetAll("usuario:$id");
-            if (isset($usuario['correo']) && $usuario['correo'] == $correo) {
-                return $usuario;
-            }
+    // Busca un usuario por su correo electrónico
+public function obtenerUsuarioPorCorreo(string $correo): ?array {
+    $ids = $this->redisLocal->sMembers('usuarios');
+    foreach ($ids as $id) {
+        $usuario = $this->redisLocal->hGetAll("usuario:$id");
+        if (isset($usuario['correo']) && $usuario['correo'] === $correo) {
+            return $usuario;
         }
-        return null; 
     }
-
-    public function obtenerUsuarioPorCorreoYTelefono($correo, $telefono) {
-        $usuarios = $this->redis->keys('usuario:*');
-
-        foreach ($usuarios as $key) {
-            $usuario = $this->redis->hGetAll($key);
-            if ($usuario['correo'] === $correo && $usuario['telefono'] === $telefono) {
-                return [
-                    'id' => $usuario['id_usuario'], // o 'id' según como lo guardes
-                    'nombre' => $usuario['nombre'],
-                ];
-            }
-        }
-        return null;
-    }
+    return null;
 }
+
+
+public function obtenerUsuarioPorCorreoYTelefono($correo, $telefono) {
+    $usuarios = $this->redisLocal->keys('usuario:*');
+
+    foreach ($usuarios as $key) {
+        $usuario = $this->redisLocal->hGetAll($key);
+        if (
+            isset($usuario['correo'], $usuario['telefono']) &&
+            $usuario['correo'] === $correo &&
+            $usuario['telefono'] === $telefono
+        ) {
+            return [
+                'id' => $usuario['id'] ?? null,
+                'nombre' => $usuario['nombre'] ?? ''
+            ];
+        }
+    }
+    return null;
+}
+
+
+public function autenticar(string $correo, string $pass): ?array {
+    $usuario = $this->obtenerUsuarioPorCorreo($correo);
+    if ($usuario && password_verify($pass, $usuario['pass_hash'])) {
+        return $usuario;
+    }
+    return null;
+}
+
+}
+
+
 ?>

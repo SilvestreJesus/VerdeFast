@@ -4,92 +4,76 @@
     <title>VerdeFast - Perfil</title>
 </head>
 <body>
-<?php include '../../controller/modules/alertas.php'; ?>
-    <header class="header">
-        <div class="logo">
-            <span class="verde">Verde</span><span class="fast">Fast</span>
-        </div>
-        <nav class="nav">
-            <ul>
-                <li>
-                    <a href="/view/form/selec_planta.php" class="a nav-item">
-                        <span class="material-symbols-outlined">home</span>
-                        Panel
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="a nav-item">
-                        <span class="material-symbols-outlined">news</span>
-                        Bitácoras
-                    </a>
-                </li>
-                <li>
-                    <a href="/view/main/configuracion.php" class="a nav-item">
-                        <span class="material-symbols-outlined">settings</span>
-                        Configuración
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="a nav-item">
-                        <span class="material-symbols-outlined">person</span>
-                        Perfil
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </header>
- 
-    
-    <main class="registro-container">
-        <div class="icon-container">
-            <img src="/assets/img/icono.png" alt="Icono" class="icon">
+
+<?php
+session_start();
+include '../../controller/modules/alertas.php';
+
+// Solo uno de los siguientes headers según el rol
+switch ($_SESSION['rol']) {
+    case 'cliente':
+        include '../layouts/modules/header.php';
+        break;
+    case 'tecnico':
+        include '../layouts/modules/header.php';
+        break;
+    case 'administrador':
+        include '../layouts/modules/header.php';
+        break;
+    default:
+        header("Location: /view/auth/login.php");
+        exit;
+}
+
+// Obtener datos del usuario
+require_once '../../controller/usuarios.php';
+$controlador = new ControladorUsuarios();
+$usuario = $controlador->ver($_SESSION['usuario_id']);
+?>
+
+<main class="registro-container">
+    <div class="icon-container">
+    <span class="material-symbols-outlined deg-primario" style="font-size: 100px;">id_card</span>
+    </div>
+
+    <form class="formulario" action="/controller/crud/registrar_usuario.php" method="POST">
+        <div class="campo">
+            <label for="nombres" class="etiqueta">Nombre(s)</label>
+            <input type="text" id="nombre" name="nombre" class="input" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
         </div>
 
-        <?php
-        require_once '../../controller/usuarios.php';
-        session_start();
-        $controlador = new ControladorUsuarios();
-        $usuario = $controlador->ver($_SESSION['usuario_id']);
-        ?>
+        <div class="campo">
+            <label for="apellidos" class="etiqueta">Apellidos</label>
+            <input type="text" id="apellidos" name="apellidos" class="input" value="<?= htmlspecialchars($usuario['apellidos']) ?>" required>
+        </div>
 
-        <form class="formulario" action="/controller/crud/registrar_usuario.php" method="POST">
-            <div class="campo">
-                <label for="nombres" class="etiqueta">Nombre(s)</label>
-                <input type="text" id="nombre" name="nombre" class="input" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
-            </div>
+        <div class="campo">
+            <label for="correo" class="etiqueta">Correo</label>
+            <input type="text" id="correo" name="correo" class="input" value="<?= htmlspecialchars($usuario['correo']) ?>" required>
+        </div>
 
-            <div class="campo">
-                <label for="apellidos" class="etiqueta">Apellidos</label>
-                <input type="text" id="apellidos" name="apellidos" class="input" value="<?= htmlspecialchars($usuario['apellidos']) ?>" required>
-            </div>
-            <div class="campo">
-                <label for="correo" class="etiqueta">Correo</label>
-                <input type="text" id="correo" name="correo" class="input" value="<?= htmlspecialchars($usuario['correo']) ?>" required>
+        <div class="campo">
+            <label for="telefono" class="etiqueta">Teléfono</label>
+            <input type="text" id="telefono" name="telefono" class="input" value="<?= htmlspecialchars($usuario['telefono']) ?>" required>
+        </div>
 
-            </div>
+        <div class="campo">
+            <label for="fecha-nac" class="etiqueta">Fecha de Nacimiento</label>
+            <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" class="input" placeholder="dd/mm/aaaa" value="<?= htmlspecialchars($usuario['fecha_nacimiento']) ?>" required>
+        </div>
 
-            <div class="campo">
-                <label for="telefono" class="etiqueta">Telefono</label>
-                <input type="text" id="telefono" name="telefono" class="input" value="<?= htmlspecialchars($usuario['telefono']) ?>" required>
+        <div class="campo">
+            <label for="genero" class="etiqueta">Género</label>
+            <input type="text" id="genero" name="genero" class="input" value="<?= htmlspecialchars($usuario['genero']) ?>" required>
+        </div>
 
-            </div>
+        <div class="campo campo-completo">
+            <label for="domicilio" class="etiqueta">Domicilio</label>
+            <input type="text" id="domicilio" name="domicilio" class="input" value="<?= htmlspecialchars($usuario['domicilio']) ?>" required>
+        </div>
 
-            <div class="campo">
-                <label for="fecha-nac" class="etiqueta">Fecha de Nacimiento</label>
-                <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" class="input" placeholder="dd/mm/aaaa" value="<?= htmlspecialchars($usuario['fecha_nacimiento']) ?>" required>
-            </div>
-            <div class="campo">
-                <label for="genero" class="etiqueta">Genero</label>
-                <input type="text" id="genero" name="genero" class="input" value="<?= htmlspecialchars($usuario['genero']) ?>" required>
+        <a href="/controller/logout.php" class="salir boton">Salir</a>
+    </form>
+</main>
 
-            </div>
-            <div class="campo campo-completo">
-                <label for="domicilio" class="etiqueta">Domicilio</label>
-                <input type="text" id="domicilio" name="domicilio" class="input" value="<?= htmlspecialchars($usuario['domicilio']) ?>" required>
-            </div>
-
-            
-            <a href="/controller/auth/logout.php" class="salir boton">Salir</a>
-        </form>
-    </main>
-<?php include '../layouts/default/footer.php'; ?>
+<?php include '../layouts/footer.php'; ?>

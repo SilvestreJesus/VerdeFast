@@ -3,7 +3,6 @@
 @import url("/assets/css/common/alertas.css");
 
 body {
-    background-color: var(--oscuro);
     opacity: 99.99%;
     display: flex;
     justify-content: center;
@@ -69,28 +68,6 @@ main div.botones {
     justify-content: center;
 }
 
-article input {
-    width: 100%;
-    padding: 15px 50px 15px 15px;
-    border: none;
-    border-radius: 25px;
-    background-color: var(--gris-700);
-    color: white;
-    font-size: 16px;
-}
-
-div.inputs article {
-    position: relative;
-    margin: 10px 0;
-}
-
-div.inputs article .material-symbols-outlined {
-    color: var(--gris-400);
-    position: absolute;
-    right: 12px;
-    top: 12px;
-}
-
 a.reg-clave {
     color: var(--gris);
     margin-top: 10px;
@@ -105,10 +82,6 @@ body > a.reg-usuario {
 
 a#rg {
     display: none;
-}
-
-::placeholder {
-    color: var(--gris);
 }
 
 @media (640px <= width <= 960px) {
@@ -165,8 +138,9 @@ a#rg {
 
 @media (960px <= width) {
     main {
-        height: 50%;
-        width: 30vw;
+        height: fit-content;
+        min-width: 28vw;
+        width: fit-content;
         max-width: inherit;
     }
 
