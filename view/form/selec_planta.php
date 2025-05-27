@@ -1,49 +1,12 @@
-
-
 <?php include '../layouts/default/head.php'; ?>
     <link rel="stylesheet" href="/assets/css/form/selec_planta.css">
     <title>VerdeFast - Seleccione Sembradío</title>
-    <link rel="icon" type="image/x-icon" href="/assets/img/icono-verdefast.png" />
 </head>
 <body>
-<?php include '../../controller/modules/alertas.php'; ?>
-    <header class="header">
-        <div class="logo">
-            <span class="verde">Verde</span><span class="fast">Fast</span>
-        </div>
-        <nav class="nav">
-            <ul>
-                <li>
-                    <a href="#" class="a nav-item">
-                        <span class="material-symbols-outlined">home</span>
-                        Panel
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="a nav-item">
-                        <span class="material-symbols-outlined">news</span>
-                        Bitácoras
-                    </a>
-                </li>
-                <li>
-                    <a href="/view/main/configuracion.php" class="a nav-item">
-                        <span class="material-symbols-outlined">settings</span>
-                        Configuración
-                    </a>
-                </li>
-                <li>
-                    <a href="/view/main/perfil.php" class="a nav-item">
-                        <span class="material-symbols-outlined">person</span>
-                        Perfil
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </header>
+<?php include '../layouts/modules/alertas.php'; ?>
 
     <main class="main-content">
-        <h1 class="title">Selecciona el sembradío que necesites</h1>
-        
+        <h1 class="title">Selecciona un sembradío</h1>
         <div class="sembradio-list">
             <div class="sembradio-item">
                 <div class="sembradio-icon">
@@ -76,7 +39,25 @@
             </div>
         </div>
     </main>
+    <script>
+document.querySelectorAll('.sembradio-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const icono = item.querySelector('.sembradio-icon').textContent.trim();
+    const nombre = item.querySelector('.sembradio-name').textContent.trim();
+    const densidad = item.querySelector('.sembradio-density').textContent.trim();
 
-    
+    // Guardar datos en localStorage
+    localStorage.setItem('sembradioSeleccionado', JSON.stringify({
+      icono,
+      nombre,
+      densidad
+    }));
+
+    // Redirigir al panel principal
+    window.location.href = '/view/main/panel.php'; // Cambia esta ruta según corresponda
+  });
+});
+</script>
+
 </body>
 </html>

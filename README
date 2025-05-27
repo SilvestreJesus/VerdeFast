@@ -1,0 +1,61 @@
+## Installing Docker
+```
+ https://www.docker.com/products/docker-desktop
+```
+### Verifica que Docker funcione
+```
+docker --version
+docker compose version
+```
+
+### Crear una caperta para el proyecto
+```
+mkdir mi-proyecto-php
+cd mi-proyecto-php
+```
+
+### Installing Linux (Ubuntu/Debian)
+```
+npm run serve
+```
+
+### Levantar el servidor
+```
+docker-compose up --build
+```
+
+### Verifica en tu navegador
+```
+http://localhost:8080
+```
+
+### Installing ngrok para el servidor web por si tiene internet
+
+#### Primero inicia session 
+```
+ https://ngrok.com/
+```
+
+#### instalar el ngrok
+```
+ https://ngrok.com/download
+```
+
+#### Abrer una terminal
+#### Extrae el archivo ngrok.exe en una carpeta fácil de acceder (por ejemplo, el Escritorio o C:\ngrok).
+```
+ngrok config add-authtoken TU_AUTHTOKEN
+```
+#### Ejecuta esto para levantar el servidor 
+```
+ngrok http 8080
+```
+
+
+### Cambiar Variables
+#### Modificar la direccion url del servidor web
+dispositivo.php 
+
+
+### Instala el programa para el Esp32 en Arduino
+Esp32
